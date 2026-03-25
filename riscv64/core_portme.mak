@@ -27,11 +27,16 @@ RISCVTYPE=riscv64-unknown-elf
 OUTFLAG= -o
 # Flag: CC
 #	Use this flag to define compiler to use
+ifneq ($(strip $(RISCVTOOLS)),)
 CC = $(RISCVTOOLS)/bin/$(RISCVTYPE)-gcc
+else
+CC = $(RISCVTYPE)-gcc
+endif
+LD = $(CC)
 # Flag: CFLAGS
 #	Use this flag to define compiler options. Note, you can add compiler options from the command line using XCFLAGS="other flags"
 #PORT_CFLAGS = -O2 -static -std=gnu99
-PORT_CFLAGS = -O2
+PORT_CFLAGS = -O2 -march=rv64gc -mabi=lp64d
 FLAGS_STR = "$(PORT_CFLAGS) $(XCFLAGS) $(XLFLAGS) $(LFLAGS_END)"
 CFLAGS = $(PORT_CFLAGS) -I$(PORT_DIR) -I. -DFLAGS_STR=\"$(FLAGS_STR)\"
 #Flag: LFLAGS_END
@@ -68,7 +73,6 @@ EXE = .riscv
 # In this case, you also need to define below how to create an object file, and how to link.
 ifdef SEPARATE_COMPILE
 
-LD		= $(RISCVTOOLS)/bin/$(RISCVTYPE)-gcc
 OBJOUT 	= -o
 LFLAGS 	=
 OFLAG 	= -o

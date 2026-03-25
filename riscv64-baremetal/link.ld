@@ -1,66 +1,56 @@
-/*======================================================================*/
-/* Proxy kernel linker script                                           */
-/*======================================================================*/
-/* This is the linker script used when building the proxy kernel. */
-
-/*----------------------------------------------------------------------*/
-/* Setup                                                                */
-/*----------------------------------------------------------------------*/
-
-/* The OUTPUT_ARCH command specifies the machine architecture where the
-   argument is one of the names used in the BFD library. More
-   specifically one of the entires in bfd/cpu-mips.c */
-
-OUTPUT_ARCH( "riscv" )
 ENTRY(_start)
-
-/*----------------------------------------------------------------------*/
-/* Sections                                                             */
-/*----------------------------------------------------------------------*/
 
 SECTIONS
 {
-
-  /* text: test code section */
   . = 0x80000000;
-  .text.init : { *(.text.init) }
+  . = ALIGN(16);
 
-  . = ALIGN(0x1000);
-  .tohost : { *(.tohost) }
+  .text : {
+    KEEP(*(.text.init))
+    *(.text)
+    *(.text.*)
+  }
 
-  .text : { *(.text) }
+  . = ALIGN(16);
 
-  /* data segment */
-  .data : { *(.data) }
+  .rodata : {
+    *(.srodata)
+    *(.srodata.*)
+    *(.rodata)
+    *(.rodata.*)
+  }
 
-  .sdata : {
+  . = ALIGN(16);
+
+  .data : {
+    *(.data)
+    *(.data.*)
     __global_pointer$ = . + 0x800;
-    *(.srodata.cst16) *(.srodata.cst8) *(.srodata.cst4) *(.srodata.cst2) *(.srodata*)
-    *(.sdata .sdata.* .gnu.linkonce.s.*)
+    *(.sdata)
+    *(.sdata.*)
+    *(COMMON)
   }
 
-  /* bss segment */
-  .sbss : {
-    *(.sbss .sbss.* .gnu.linkonce.sb.*)
+  . = ALIGN(16);
+
+  .bss : {
+    *(.sbss)
+    *(.sbss.*)
     *(.scommon)
-  }
-  .bss : { *(.bss) }
+    *(.bss)
+    *(.bss.*)
 
-  /* thread-local data segment */
-  .tdata :
-  {
-    _tls_data = .;
-    *(.tdata.begin)
-    *(.tdata)
-    *(.tdata.end)
-  }
-  .tbss :
-  {
-    *(.tbss)
-    *(.tbss.end)
-  }
+    . = ALIGN(16);
+    heap_low = .;
 
-  /* End of uninitalized data segement */
-  _end = .;
+    . = . + 0x1000000;
+
+    . = ALIGN(16);
+    heap_top = .;
+
+    . = . + 0x1000000;
+
+    . = ALIGN(16);
+    stack_top = .;
+  }
 }
-
