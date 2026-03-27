@@ -1,7 +1,13 @@
 #include <limits.h>
 #include <stdarg.h>
 #include <stdint.h>
+#ifndef BAREMETAL_ENABLE_PRINTF
+#define BAREMETAL_ENABLE_PRINTF 1
+#endif
+
+#if BAREMETAL_ENABLE_PRINTF
 #include <stdio.h>
+#endif
 #include <stdlib.h>
 #include <sys/signal.h>
 #include "util.h"

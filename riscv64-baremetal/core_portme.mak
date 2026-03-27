@@ -32,13 +32,18 @@ CC = $(RISCVTOOLS)/bin/$(RISCVTYPE)-gcc
 else
 CC = $(RISCVTYPE)-gcc
 endif
+ifneq ($(strip $(RISCVTOOLS)),)
+TOOLCHAIN_BINFLAG = -B$(RISCVTOOLS)/bin
+endif
 LD = $(CC)
 # Flag: CFLAGS
 #	Use this flag to define compiler options. Note, you can add compiler options from the command line using XCFLAGS="other flags"
 #PORT_CFLAGS = -O2 -static -std=gnu99
-PORT_CFLAGS = -O2 -mcmodel=medany -static -std=gnu99 -fno-common -fno-tree-loop-distribute-patterns -fno-asynchronous-unwind-tables -fno-unwind-tables -nostdlib -nostartfiles -T $(PORT_DIR)/link.ld
+BAREMETAL_ENABLE_PRINTF ?= 1
+enable_920 ?= 0
+PORT_CFLAGS = $(TOOLCHAIN_BINFLAG) -O2 -mcmodel=medany -static -std=gnu99 -fno-common -fno-tree-loop-distribute-patterns -fno-asynchronous-unwind-tables -fno-unwind-tables -nostdlib -nostartfiles -T $(PORT_DIR)/link.ld
 FLAGS_STR = "$(PORT_CFLAGS) $(XCFLAGS) $(XLFLAGS) $(LFLAGS_END)"
-CFLAGS = $(PORT_CFLAGS) -I$(PORT_DIR) -I. -DFLAGS_STR=\"$(FLAGS_STR)\"
+CFLAGS = $(PORT_CFLAGS) -I$(PORT_DIR) -I. -DBAREMETAL_ENABLE_PRINTF=$(BAREMETAL_ENABLE_PRINTF) -Denable_920=$(enable_920) -DFLAGS_STR=\"$(FLAGS_STR)\"
 #Flag: LFLAGS_END
 #	Define any libraries needed for linking or other flags that should come at the end of the link line (e.g. linker scripts).
 #	Note: On certain platforms, the default clock_gettime implementation is supported but requires linking of librt.

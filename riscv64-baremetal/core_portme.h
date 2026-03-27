@@ -44,17 +44,28 @@ Original Author: Shay Gal-on
 #ifndef USE_CLOCK
 #define USE_CLOCK 0
 #endif
+/* Configuration: BAREMETAL_ENABLE_PRINTF
+	Default switch for enabling stdio/printf support on this port.
+*/
+#ifndef BAREMETAL_ENABLE_PRINTF
+#define BAREMETAL_ENABLE_PRINTF 1
+#endif
+
 /* Configuration: HAS_STDIO
 	Define to 1 if the platform has stdio.h.
 */
 #ifndef HAS_STDIO
-#define HAS_STDIO 1
+#define HAS_STDIO BAREMETAL_ENABLE_PRINTF
 #endif
 /* Configuration: HAS_PRINTF
 	Define to 1 if the platform has stdio.h and implements the printf function.
 */
 #ifndef HAS_PRINTF
-#define HAS_PRINTF 1
+#define HAS_PRINTF BAREMETAL_ENABLE_PRINTF
+#endif
+
+#if !HAS_PRINTF
+#define ee_printf(...) ((void)0)
 #endif
 
 /* Configuration: CORE_TICKS
@@ -107,6 +118,9 @@ typedef unsigned char ee_u8;
 typedef unsigned int ee_u32;
 typedef unsigned long long ee_ptr_int;
 typedef size_t ee_size_t;
+#ifndef NULL
+#define NULL ((void *)0)
+#endif
 /* align an offset to point to a 32b value */
 #define align_mem(x) (void *)(4 + (((ee_ptr_int)(x) - 1) & ~3))
 

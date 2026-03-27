@@ -7,6 +7,10 @@ extern void setStats(int enable);
 
 #include <stdint.h>
 
+#ifndef BAREMETAL_ENABLE_PRINTF
+#define BAREMETAL_ENABLE_PRINTF 1
+#endif
+
 #define static_assert(cond) switch(0) { case 0: case !!(long)(cond): ; }
 
 static int verify(int n, const volatile int* test, const int* verify)
@@ -78,6 +82,7 @@ static uintptr_t insn_len(uintptr_t pc)
 
 #define stringify_1(s) #s
 #define stringify(s) stringify_1(s)
+#if BAREMETAL_ENABLE_PRINTF
 #define stats(code, iter) do { \
     unsigned long _c = -read_csr(mcycle), _i = -read_csr(minstret); \
     code; \
@@ -86,5 +91,12 @@ static uintptr_t insn_len(uintptr_t pc)
       printf("\n%s: %ld cycles, %ld.%ld cycles/iter, %ld.%ld CPI\n", \
              stringify(code), _c, _c/iter, 10*_c/iter%10, _c/_i, 10*_c/_i%10); \
   } while(0)
+#else
+#define stats(code, iter) do { \
+    unsigned long _c = -read_csr(mcycle), _i = -read_csr(minstret); \
+    code; \
+    _c += read_csr(mcycle), _i += read_csr(minstret); \
+  } while(0)
+#endif
 
 #endif //__UTIL_H
